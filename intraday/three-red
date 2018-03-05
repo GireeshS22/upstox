@@ -115,19 +115,6 @@ def decision(temp):
         print(stoplossforbuy(script, round(0.05 * round(float(temp[-3]["low"]) / 0.05), 2)))
         bought[script] = temp[-1]["cp"]
 
-def tenMMACross(temp):
-    movingAve = movingAve10m(script)
-    print("Current status for %s is ///CP-2 is: %s ///CP is: %s ///moving ave 10m is:" % (script, temp[-2]["cp"], temp[-1]["cp"]), movingAve)
-    if temp[-3]["cp"] > movingAve and temp[-2]["cp"] > movingAve and temp[-1]["cp"] < movingAve:
-        print(sell(script))
-        print(stoplossforsell(script, temp[-3]["high"]))
-        sold[script] = temp[-1]["cp"]
-
-    if temp[-3]["cp"] < movingAve and temp[-2]["cp"] < movingAve and temp[-1]["cp"] > movingAve:
-        print(buy(script))
-        print(stoplossforbuy(script, temp[-3]["low"]))
-        bought[script] = temp[-1]["cp"]
-
 bought = {}
 sold = {}
 profit = 0
