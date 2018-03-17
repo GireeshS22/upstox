@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Mar 17 23:30:20 2018
+
+@author: Gireesh Sundaram
+"""
+#%%
+import pandas as pd
+import matplotlib.pyplot as plt
+
+#%%
+data = pd.read_csv("D:/Upstox/Historic data/CENTRALBK.csv")
+data = data.tail(200)
+data.head()
+data["sma5"] = data.cp.rolling(window=5).mean()
+data["sma50"] = data.cp.rolling(window=50).mean()
+
+#%%
+plt.plot(data["timestamp"], data["cp"])
+plt.plot(data["timestamp"], data["sma5"], color = "Green")
+plt.plot(data["timestamp"], data["sma50"], color = "red")
+plt.show()
