@@ -1,22 +1,75 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 17 23:30:20 2018
 
-@author: Gireesh Sundaram
-"""
-#%%
+# coding: utf-8
+
+# In[1]:
+
+
+#Importing packages
+from upstox_api.api import *
+from datetime import datetime, time
+import time as sleep
+import os
 import pandas as pd
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 
-#%%
-data = pd.read_csv("D:/Upstox/Historic data/CENTRALBK.csv")
-data = data.tail(200)
-data.head()
-data["sma5"] = data.cp.rolling(window=5).mean()
-data["sma50"] = data.cp.rolling(window=50).mean()
 
-#%%
-plt.plot(data["timestamp"], data["cp"])
-plt.plot(data["timestamp"], data["sma5"], color = "Green")
-plt.plot(data["timestamp"], data["sma50"], color = "red")
-plt.show()
+# In[2]:
+
+
+api_key = "YOUR_API_KEY"
+api_secret = "YOUR_API_SECRET"
+redirect_uri = "YOUR_REDIRECT_URI"
+s = Session(api_key)
+s.set_redirect_uri(redirect_uri)
+s.set_api_secret(api_secret)
+print(s.get_login_url())
+
+
+# In[3]:
+
+
+
+code = "YOUR_CODE"
+
+s.set_code (code)
+access_token = s.retrieve_access_token()
+
+u = Upstox (api_key, access_token)
+
+print("Login successful. Verify profile:")
+print(u.get_profile())
+
+
+# In[5]:
+
+
+master = u.get_master_contract('NSE_EQ')  # get contracts for NSE EQ
+#function to fetch historic data
+def historicData(script, start_dt, end_dt):
+    data = pd.DataFrame(u.get_ohlc(u.get_instrument_by_symbol('NSE_EQ', script),
+                      OHLCInterval.Minute_1,
+                      datetime.strptime(start_dt, '%d/%m/%Y').date(),
+                      datetime.strptime(end_dt, '%d/%m/%Y').date()))
+    data.head()
+    data["sma5"] = data.cp.rolling(window=5).mean()
+    data["sma50"] = data.cp.rolling(window=50).mean()
+    return data
+
+
+# In[6]:
+
+
+def plotprice(script):
+    plt.plot(script["timestamp"], script["cp"], color = "black")
+    plt.plot(script["timestamp"], script["sma5"], color = "blue")
+    plt.plot(script["timestamp"], script["sma50"], color = "green")
+    plt.show()
+
+
+# In[11]:
+
+
+apollo = historicData("JETAIRWAYS", "19/03/2018", "19/03/2018").head(300)
+apollo.head()
+plotprice(apollo)
+
