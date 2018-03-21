@@ -13,9 +13,9 @@ import os
 import pandas as pd
 
 #%%
-api_key = "uvWJebUEBC5MuZz0SWoyx9Il4HX9taXn59rpERsR"
-api_secret = "d2kv2xvksl"
-redirect_uri = "http://127.0.0.1"
+api_key = "api_key"
+api_secret = "api_secret"
+redirect_uri = "redirect_uri"
 s = Session(api_key)
 s.set_redirect_uri(redirect_uri)
 s.set_api_secret(api_secret)
@@ -79,13 +79,13 @@ def sell(script, amount, stoploss, squareoff):
                  20)  # trailing_ticks 20 * 0.05
 
 def SMACrossOver(ScriptData, script):
-    if ScriptData.sma5.iloc[-6] < ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] < ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] < ScriptData.sma50.il$
+    if ScriptData.sma5.iloc[-6] < ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] < ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] < ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] < ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] > ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] > ScriptData.sma50.iloc[-1]:
         squareoff = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         stoploss = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         print("Buying at: %s -- stop loss at: %s --  square off at: %s" %(ScriptData.cp.iloc[-1], stoploss, squareoff))
         buy(script, ScriptData.cp.iloc[-1], stoploss, squareoff)
 
-    if ScriptData.sma5.iloc[-6] > ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] > ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] > ScriptData.sma50.il$
+    if ScriptData.sma5.iloc[-6] > ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] > ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] > ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] > ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] < ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] < ScriptData.sma50.iloc[-1]:
         squareoff = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         stoploss = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         print("Selling at: %s -- stop loss at: %s --  square off at: %s" %(ScriptData.cp.iloc[-1], stoploss, squareoff))
@@ -98,7 +98,7 @@ def CheckTrades():
     now_time = now.time()
 
     if time(3,51) <= now_time <= time(8,45) and CheckBalance() > 1500:
-        bucket = ["BANKINDIA", "ADANIENT", "CANBK", "JINDALSTEL", "VAKRANGEE", "FORTIS", "JISLJALEQS", "GRAPHITE", "PCJEWELLER", "BOMDYEING", "RELCAPITAL", "IBREALEST"$
+        bucket = ["BANKINDIA", "ADANIENT", "CANBK", "JINDALSTEL", "VAKRANGEE", "FORTIS", "JISLJALEQS", "GRAPHITE", "PCJEWELLER", "BOMDYEING", "RELCAPITAL", "IBREALEST", "INFIBEAM", "KTKBANK", "TATAGLOBAL"]
 
         for script in bucket:
             print("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
@@ -109,6 +109,7 @@ def CheckTrades():
         print("Exiting all the open position now and exiting execution")
         u.cancel_all_orders() #Cancel all open orders
         exit()
+
 
     else:
         print("There is no market activity now. Checking in 10 mins.. Now the time is: %s" % datetime.now().time())
