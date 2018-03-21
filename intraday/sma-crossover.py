@@ -13,8 +13,8 @@ import os
 import pandas as pd
 
 #%%
-api_key = "your_api_key"
-api_secret = "api_secret"
+api_key = "uvWJebUEBC5MuZz0SWoyx9Il4HX9taXn59rpERsR"
+api_secret = "d2kv2xvksl"
 redirect_uri = "http://127.0.0.1"
 s = Session(api_key)
 s.set_redirect_uri(redirect_uri)
@@ -45,7 +45,7 @@ def historicData(script, start_dt, end_dt):
                       OHLCInterval.Minute_1,
                       datetime.strptime(start_dt, '%d/%m/%Y').date(),
                       datetime.strptime(end_dt, '%d/%m/%Y').date()))
-    data.head()
+    data = data.tail(100)
     data["sma5"] = data.cp.rolling(window=5).mean()
     data["sma50"] = data.cp.rolling(window=50).mean()
     return data
@@ -78,42 +78,44 @@ def sell(script, amount, stoploss, squareoff):
                  squareoff,  # square_off
                  20)  # trailing_ticks 20 * 0.05
 
-def SMACrossOver(ScriptData):
-    if ScriptData.sma5.iloc[-6] < ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] < ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] < ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] < ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] > ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] > ScriptData.sma50.iloc[-1]:
+def SMACrossOver(ScriptData, script):
+    if ScriptData.sma5.iloc[-6] < ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] < ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] < ScriptData.sma50.il$
         squareoff = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         stoploss = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         print("Buying at: %s -- stop loss at: %s --  square off at: %s" %(ScriptData.cp.iloc[-1], stoploss, squareoff))
         buy(script, ScriptData.cp.iloc[-1], stoploss, squareoff)
-        
-    if ScriptData.sma5.iloc[-6] > ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] > ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] > ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] > ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] < ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] < ScriptData.sma50.iloc[-1]:
+
+    if ScriptData.sma5.iloc[-6] > ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] > ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] > ScriptData.sma50.il$
         squareoff = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         stoploss = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
         print("Selling at: %s -- stop loss at: %s --  square off at: %s" %(ScriptData.cp.iloc[-1], stoploss, squareoff))
         sell(script, ScriptData.cp.iloc[-1], stoploss, squareoff)
-        
-        
+
+
 #%%
-def CheckTrades():    
+def CheckTrades():
     now = datetime.now()
     now_time = now.time()
 
-    if time(05,41) <= now_time <= time(08,45) and CheckBalance() > 1500:
-        bucket = ["BANKINDIA", "ADANIENT", "CANBK", "JINDALSTEL", "VAKRANGEE", "FORTIS", "JISLJALEQS", "GRAPHITE", "PCJEWELLER", "BOMDYEING", "RELCAPITAL", "IBREALEST", "INFIBEAM", "KTKBANK", "TATAGLOBAL"]
-        
+    if time(3,51) <= now_time <= time(8,45) and CheckBalance() > 1500:
+        bucket = ["BANKINDIA", "ADANIENT", "CANBK", "JINDALSTEL", "VAKRANGEE", "FORTIS", "JISLJALEQS", "GRAPHITE", "PCJEWELLER", "BOMDYEING", "RELCAPITAL", "IBREALEST"$
+
         for script in bucket:
             print("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
             print("Checking for 50 min 5min MA Crossover for %s" % script)
-            SMACrossOver(historicData(script, "19/03/2018", "19/03/2018"))
-            
-    elif time(09,28) <= now_time <= time(09,30):
+            SMACrossOver(historicData(script, "20/03/2018", "21/03/2018"), script)
+
+    elif time(9,28) <= now_time <= time(9,30):
         print("Exiting all the open position now and exiting execution")
         u.cancel_all_orders() #Cancel all open orders
         exit()
-        
+
     else:
         print("There is no market activity now. Checking in 10 mins.. Now the time is: %s" % datetime.now().time())
         sleep.sleep(120)
-        
+
 #%%
 while True:
     CheckTrades()
+    print("\n***Now waiting for 30 seconds")
+    sleep.sleep(30)
