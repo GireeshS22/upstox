@@ -18,17 +18,17 @@ log = open("D:\\Upstox\\log\\log.txt", "w")
 execution = open("D:\\Upstox\\log\\execution.txt", "w")
 
 #Creating header for execution:
-execution.write("Buy or sell | Price | Stoploss | Square off \n")
+execution.write("Script | Buy or sell | Price | Stoploss | Square off \n")
 
 #%%
-api_key = "api_key"
-api_secret = "api_secret"
-redirect_uri = "redirect_uri"
+api_key = "uvWJebUEBC5MuZz0SWoyx9Il4HX9taXn59rpERsR"
+api_secret = "d2kv2xvksl"
+redirect_uri = "http://127.0.0.1"
 s = Session(api_key)
 s.set_redirect_uri(redirect_uri)
 s.set_api_secret(api_secret)
 print(s.get_login_url())
-code = input("Enter the code that you got here: ")
+code = "08f2524da767c63cfb121647846225f752e5722b"
 
 s.set_code (code)
 access_token = s.retrieve_access_token()
@@ -60,6 +60,24 @@ def historicData(script, start_dt, end_dt):
     data["sma50"] = data.cp.rolling(window=50).mean()
     return data
 
+def CheckPositionSell(stock):
+    position = pd.DataFrame(u.get_positions())
+    bought = position.loc[position["realized_profit"] > 0]["symbol"].tolist()
+    if stock not in bought:
+        return True
+    elif stock in bought:
+        print("There is already a long position on %s, so not selling" %stock)
+        log.write("There is already a long position on %s, so not selling" %stock)
+    
+def CheckPositionBuy(stock):
+    position = pd.DataFrame(u.get_positions())
+    sold = position.loc[position["realized_profit"] < 0]["symbol"].tolist()
+    if stock not in sold:
+        return True
+    elif stock in sold:
+        print("There is already a short position on %s, so not buying" %stock)
+        log.write("There is already a short position on %s, so not buying" %stock)
+    
 def buy(script, amount, stoploss, squareoff):
     cp = u.get_live_feed(u.get_instrument_by_symbol('NSE_EQ', script), LiveFeedType.LTP)
     return u.place_order(TransactionType.Buy,  # transaction_type
@@ -94,16 +112,18 @@ def SMACrossOver(ScriptData, script):
     if ScriptData.sma5.iloc[-6] < ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] < ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] < ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] < ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] > ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] > ScriptData.sma50.iloc[-1]:
         squareoff = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.0075)), 0))
         stoploss = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
-        buy(script, ScriptData.cp.iloc[-1], stoploss, squareoff)
+        if CheckPositionBuy(script):
+            buy(script, ScriptData.cp.iloc[-1], stoploss, squareoff)
         print("Buying at: %s -- stop loss at: %s --  square off at: %s" %(ScriptData.cp.iloc[-1], stoploss, squareoff))
-        execution.write("Buy | %s | %s | %s \n" %(ScriptData.cp.iloc[-1], stoploss, squareoff))
+        execution.write("%s | Buy | %s | %s | %s \n" %(script, ScriptData.cp.iloc[-1], stoploss, squareoff))
 
     if ScriptData.sma5.iloc[-6] > ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] > ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] > ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] > ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] < ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] < ScriptData.sma50.iloc[-1]:
         squareoff = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.0075)), 0))
         stoploss = float(round(abs(ScriptData.cp.iloc[-1] - (ScriptData.cp.iloc[-1] * 1.01)), 0))
-        sell(script, ScriptData.cp.iloc[-1], stoploss, squareoff)
+        if CheckPositionSell(script):
+            sell(script, ScriptData.cp.iloc[-1], stoploss, squareoff)
         print("Selling at: %s -- stop loss at: %s --  square off at: %s" %(ScriptData.cp.iloc[-1], stoploss, squareoff))
-        execution.write("Sell | %s | %s | %s \n" %(ScriptData.cp.iloc[-1], stoploss, squareoff))    
+        execution.write("%s | Sell | %s | %s | %s \n" %(script, ScriptData.cp.iloc[-1], stoploss, squareoff))    
 
 
 #%%
@@ -111,17 +131,17 @@ def CheckTrades():
     now = datetime.now()
     now_time = now.time()
 
-    if time(3,51) <= now_time <= time(8,45) and CheckBalance() > 1500:
-        bucket = ["VAKRANGEE", "JINDALSTEL", "CANBK", "IBREALEST", "PCJEWELLER", "BANKINDIA", "ADANIENT", "FORTIS", "INFIBEAM", "RADICO", "RAIN", "DEEPAKNTR", "KPIT", "IGL", "GHCL", "DELTACORP", "STRTECH", "ASHOKA", "L&TFH", "EDELWEISS", "NBCC", "GSPL", "BOMDYEING", "EXIDEIND", "CASTROLIND", "HEXAWARE", "INDIANB", "JISLJALEQS", "EIHOTEL", "TATAGLOBAL"]
+    if time(9,21) <= now_time <= time(14,15) and CheckBalance() > 1500:
+        bucket = ["ADANIENT", "BALRAMCHIN", "BANDHANBNK", "BANKINDIA", "CANBK", "CANFINHOME", "DELTACORP", "FCONSUMER", "FEDERALBNK", "FORTIS", "FSL", "IBREALEST", "IDBI", "INDIACEM", "INFIBEAM", "JINDALSTEL", "JUSTDIAL", "KTKBANK", "KWALITY", "PCJEWELLER", "RELCAPITAL", "SANDHAR", "TATAGLOBAL", "TV18BRDCST", "UNIONBANK"]
 
         for script in bucket:
             print("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
             log.write("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
             print("Checking for 50 min 5min MA Crossover for %s" % script)
             log.write("Checking for 50 min 5min MA Crossover for %s" % script)
-            SMACrossOver(historicData(script, "22/03/2018", "23/03/2018"), script)
+            SMACrossOver(historicData(script, "02/04/2018", "03/04/2018"), script)
 
-    elif time(9,28) <= now_time <= time(9,30):
+    elif time(14,58) <= now_time <= time(15,00):
         print("Exiting all the open position now and exiting execution")
         log.write("Exiting all the open position now and exiting execution")
         u.cancel_all_orders() #Cancel all open orders
