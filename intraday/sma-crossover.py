@@ -21,14 +21,14 @@ execution = open("D:\\Upstox\\log\\execution.txt", "w")
 execution.write("Script | Buy or sell | Price | Stoploss | Square off \n")
 
 #%%
-api_key = "uvWJebUEBC5MuZz0SWoyx9Il4HX9taXn59rpERsR"
-api_secret = "d2kv2xvksl"
+api_key = "api_key"
+api_secret = "api_secret"
 redirect_uri = "http://127.0.0.1"
 s = Session(api_key)
 s.set_redirect_uri(redirect_uri)
 s.set_api_secret(api_secret)
 print(s.get_login_url())
-code = "08f2524da767c63cfb121647846225f752e5722b"
+code = input("Enter your code here: ")
 
 s.set_code (code)
 access_token = s.retrieve_access_token()
