@@ -23,14 +23,14 @@ quantity = 3
 execution.write("Script | Buy or sell | Price | Stoploss | Square off \n")
 
 #%%
-api_key = "uvWJebUEBC5MuZz0SWoyx9Il4HX9taXn59rpERsR"
-api_secret = "d2kv2xvksl"
+api_key = "api_key"
+api_secret = "api_secret"
 redirect_uri = "http://127.0.0.1"
 s = Session(api_key)
 s.set_redirect_uri(redirect_uri)
 s.set_api_secret(api_secret)
 print(s.get_login_url())
-code = "9df8162b6f764c0ddaada6b90dfa2227c0135d9d"
+code = input("Enter the code that you got from the browser: ")
 
 s.set_code (code)
 access_token = s.retrieve_access_token()
