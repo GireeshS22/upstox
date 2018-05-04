@@ -30,7 +30,7 @@ s = Session(api_key)
 s.set_redirect_uri(redirect_uri)
 s.set_api_secret(api_secret)
 print(s.get_login_url())
-code = input("Enter the code that you got from the browser: ")
+code = "Code"
 
 s.set_code (code)
 access_token = s.retrieve_access_token()
@@ -57,10 +57,24 @@ def historicData(script, start_dt, end_dt):
                       OHLCInterval.Minute_1,
                       datetime.strptime(start_dt, '%d/%m/%Y').date(),
                       datetime.strptime(end_dt, '%d/%m/%Y').date()))
-    data = data.tail(100)
+    data = data.tail(60)
     data["sma5"] = data.cp.rolling(window=5).mean()
     data["sma50"] = data.cp.rolling(window=50).mean()
+    data["difference"] =  data["sma5"] -  data["sma50"]
+    print(data.tail(5))
     return data
+
+def IsLoss(stock):
+    position = pd.DataFrame(u.get_positions())
+    if position.empty:
+        return True
+    realized = position.loc[position["realized_profit"] < -6]["symbol"].tolist()
+    if stock not in realized or not realized:
+        return True
+    elif stock in realized:
+        print("We have already took loss in %s not buying again" %stock)
+        log.write("We have already took loss in %s not buying again" %stock)
+        return False
 
 def CheckPositionSell(stock):
     position = pd.DataFrame(u.get_positions())
@@ -129,29 +143,46 @@ def sell(script):
                  squareoff,  # square_off
                  20)  # trailing_ticks 20 * 0.05
 
-def SMACrossOver(ScriptData, script):
+def SMACrossOver1(ScriptData, script):
     if ScriptData.sma5.iloc[-6] < ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] < ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] < ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] < ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] > ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] > ScriptData.sma50.iloc[-1]:
-        if CheckPositionBuy(script):
+        if CheckPositionBuy(script) and IsLoss(script):
             buy(script)
 
     if ScriptData.sma5.iloc[-6] > ScriptData.sma50.iloc[-6] and ScriptData.sma5.iloc[-5] > ScriptData.sma50.iloc[-5] and ScriptData.sma5.iloc[-4] > ScriptData.sma50.iloc[-4] and ScriptData.sma5.iloc[-3] > ScriptData.sma50.iloc[-3] and ScriptData.sma5.iloc[-2] < ScriptData.sma50.iloc[-2] and ScriptData.sma5.iloc[-1] < ScriptData.sma50.iloc[-1]:
-        if CheckPositionSell(script):
+        if CheckPositionSell(script) and IsLoss(script):
             sell(script)
             
+def SMACrossOver2(ScriptData, script):
+    if ScriptData.difference.iloc[-6] < 0 and ScriptData.difference.iloc[-5] < 0 and ScriptData.difference.iloc[-4] < 0 and ScriptData.difference.iloc[-3] < 0 and ScriptData.difference.iloc[-2] < 0 and ScriptData.difference.iloc[-1] < 0 and (ScriptData.difference.iloc[-6] < ScriptData.difference.iloc[-5] < ScriptData.difference.iloc[-4] < ScriptData.difference.iloc[-3] < ScriptData.difference.iloc[-2] < ScriptData.difference.iloc[-1]) and -0.2 <= ScriptData.difference.iloc[-1] <= 0:
+        if CheckPositionBuy(script) and IsLoss(script):
+            buy(script)
+
+    if ScriptData.difference.iloc[-6] > 0 and ScriptData.difference.iloc[-5] > 0 and ScriptData.difference.iloc[-4] > 0 and ScriptData.difference.iloc[-3] > 0 and ScriptData.difference.iloc[-2] > 0 and ScriptData.difference.iloc[-1] > 0 and (ScriptData.difference.iloc[-6] > ScriptData.difference.iloc[-5] > ScriptData.difference.iloc[-4] > ScriptData.difference.iloc[-3] > ScriptData.difference.iloc[-2] > ScriptData.difference.iloc[-1]) and 0 <= ScriptData.difference.iloc[-1] <= 0.2:
+        if CheckPositionSell(script) and IsLoss(script):
+            sell(script)
+           
 #%%
 def CheckTrades():
     now = datetime.now()
     now_time = now.time()
 
-    if time(9,21) <= now_time <= time(14,15) and CheckBalance() > 1500:
-        bucket = ["ADANIENT", "ADANITRANS", "APOLLOTYRE", "BOMDYEING", "CANBK", "CANFINHOME", "DELTACORP", "DHFL", "FORTIS", "HDFCLIFE", "HEXAWARE", "IBREALEST", "INDIACEM", "INFIBEAM", "IRB", "JAICORPLTD", "JETAIRWAYS", "JINDALSTEL", "JISLJALEQS", "KTKBANK", "NBCC", "NCC", "NIITLTD", "PCJEWELLER", "RELCAPITAL"]
+    if time(10,21) <= now_time <= time(14,15) and CheckBalance() > 500:
+        bucket1 = ["ABAN", "APOLLOTYRE", "BEPL", "CANBK", "DATAMATICS", "FORTIS", "IBREALEST", "INDIACEM", "IRB", "JINDALSTEL", "KPIT", "NBCC", "PCJEWELLER", "SANGHIIND", "TAKE"]
+        bucket2 = ["ADANIENT", "BANKINDIA", "BOMDYEING", "CROMPTON", "DELTACORP", "HINDOILEXP", "IBVENTURES", "INFIBEAM", "JAICORPLTD", "JISLJALEQS", "KTKBANK", "NCC", "PRAKASH", "SUVEN", "TATAGLOBAL"]
 
-        for script in bucket:
+        for script in bucket1:
             print("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
             log.write("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
             print("Checking for 50 min 5min MA Crossover for %s" % script)
             log.write("Checking for 50 min 5min MA Crossover for %s" % script)
-            SMACrossOver(historicData(script, "03/04/2018", "04/04/2018"), script)
+            SMACrossOver1(historicData(script, "08/04/2018", "09/04/2018"), script)
+            
+        for script2 in bucket2:
+            print("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
+            log.write("~~~~~~~~~~~~~~~~~~~~~~~ \n Now the time is: %s" % datetime.now().time())
+            print("Checking for 50 min 5min MA Crossover for %s" % script2)
+            log.write("Checking for 50 min 5min MA Crossover for %s" % script2)
+            SMACrossOver2(historicData(script2, "10/04/2018", "10/04/2018"), script2)
 
     elif time(14,58) <= now_time <= time(15,00):
         print("Exiting all the open position now and exiting execution")
